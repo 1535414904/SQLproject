@@ -66,6 +66,7 @@ $password = '12345';             // 密碼（通常預設是空）
 ```
 php -S localhost:8000
 ```
+
 6.打開瀏覽器，輸入網址：
 ```
 http://localhost:8000
