@@ -10,7 +10,6 @@ include 'db.php';
 $user_id = $_SESSION['user_id'];
 $error = "";
 
-// 新增記錄
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
     $amount = $_POST['amount'];
     $category_id = $_POST['category_id'];
@@ -25,7 +24,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
         header("Location: index.php?success=1");
         exit;
     } else {
-        $error = "❌ 發生錯誤：" . $conn->error;
+        $error = "發生錯誤：" . $conn->error;
     }
     $stmt->close();
 }
@@ -35,24 +34,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <title>➕ 新增記錄</title>
+  <title>新增記錄</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .top-bar {
+      background-color: #2e7d32;
+      color: white;
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .form-container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+    .btn-success {
+      background-color: #388e3c;
+      border-color: #388e3c;
+    }
+    .btn-success:hover {
+      background-color: #2e7d32;
+      border-color: #2e7d32;
+    }
+    .btn-outline-primary {
+      color: #2e7d32;
+      border-color: #2e7d32;
+    }
+    .btn-outline-primary:hover {
+      background-color: #2e7d32;
+      color: white;
+    }
+  </style>
 </head>
-<body class="bg-light">
-<div class="container mt-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <h2>➕ 新增記帳記錄</h2>
-    <div>
-      👤 <?= htmlspecialchars($_SESSION['name']) ?> |
-      <a href="logout.php" class="btn btn-sm btn-outline-secondary">登出</a>
-    </div>
+<body>
+<div class="top-bar">
+  <div>新增記帳記錄</div>
+  <div>
+    <?= htmlspecialchars($_SESSION['name'] ?? '使用者') ?> |
+    <a href="logout.php" class="btn btn-sm btn-light">登出</a>
   </div>
+</div>
 
+<div class="container py-4">
   <?php if ($error): ?>
     <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
   <?php endif; ?>
 
-  <form method="post" class="p-4 bg-white shadow rounded">
+  <form method="post" class="form-container">
     <input type="hidden" name="add_transaction" value="1">
     <div class="row g-3">
       <div class="col-md-2">
@@ -87,10 +122,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
         <input type="text" name="note" class="form-control">
       </div>
     </div>
-
     <div class="mt-4 text-end">
-      <button type="submit" class="btn btn-success">✅ 儲存記錄</button>
-      <a href="categories.php" class="btn btn-outline-primary">📂 分類管理</a>
+      <button type="submit" class="btn btn-success">儲存記錄</button>
+      <a href="categories.php" class="btn btn-outline-primary">分類管理</a>
       <a href="index.php" class="btn btn-secondary">返回主頁</a>
     </div>
   </form>
