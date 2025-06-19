@@ -51,6 +51,23 @@ $total_income = $summary['total_income'] ?? 0;
 $total_expense = $summary['total_expense'] ?? 0;
 $balance = $total_income - $total_expense;
 
+
+if (isset($_GET['delete'])) {
+    $delete_id = (int)$_GET['delete'];
+
+    $stmt = $conn->prepare("DELETE FROM transactions WHERE transaction_id = ? AND user_id = ?");
+    $stmt->bind_param("ii", $delete_id, $user_id);
+
+    if ($stmt->execute()) {
+        header("Location: index.php?success=delete&id=" . $delete_id);
+        exit;
+    } else {
+        $error = "刪除失敗：" . $conn->error;
+    }
+    $stmt->close();
+}
+
+
 // --- update record ---
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_transaction'])) {
     $edit_id = (int)$_POST['transaction_id'];
