@@ -176,9 +176,16 @@ $balance = $total_income - $total_expense;
   </style>
 </head>
 <body>
-<div class="top-bar">
+<!-- <div class="top-bar">
   <div>歡迎，<?= htmlspecialchars($_SESSION['name'] ?? '使用者') ?></div>
   <a href="logout.php" class="btn btn-sm btn-light">登出</a>
+</div> -->
+<div class="top-bar">
+  <div>歡迎，<?= htmlspecialchars($_SESSION['name'] ?? '使用者') ?></div>
+  <div>
+    <a href="profile.php" class="btn btn-sm btn-outline-light me-2">個人資料</a>
+    <a href="logout.php" class="btn btn-sm btn-light">登出</a>
+  </div>
 </div>
 
 <div class="container py-4">
