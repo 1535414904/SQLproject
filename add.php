@@ -5,31 +5,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php");
     exit;
 }
-include 'db.php';
-
-$user_id = $_SESSION['user_id'];
-$error = "";
-
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
-    $amount = $_POST['amount'];
-    $category_id = $_POST['category_id'];
-    $type = $_POST['type'];
-    $note = $_POST['note'];
-    $date = $_POST['date'];
-
-    $stmt = $conn->prepare("INSERT INTO transactions (user_id, category_id, type, amount, note, date)
-                            VALUES (?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("iiidss", $user_id, $category_id, $type, $amount, $note, $date);
-    if ($stmt->execute()) {
-        header("Location: index.php?success=1");
-        exit;
-    } else {
-        $error = "發生錯誤：" . $conn->error;
-    }
-    $stmt->close();
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
@@ -74,6 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
   </style>
 </head>
 <body>
+
 <div class="top-bar">
   <div>新增記帳記錄</div>
   <div>
@@ -83,17 +60,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
 </div>
 
 <div class="container py-4">
-  <?php if ($error): ?>
-    <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-  <?php endif; ?>
+  <div id="errorBox" class="alert alert-danger d-none"></div>
 
-  <form method="post" class="form-container">
-    <input type="hidden" name="add_transaction" value="1">
+  <form id="addForm" class="form-container">
     <div class="row g-3">
       <div class="col-md-2">
         <label class="form-label">金額</label>
         <input type="number" step="0.01" name="amount" class="form-control" required>
       </div>
+
       <div class="col-md-2">
         <label class="form-label">類型</label>
         <select name="type" class="form-select" required>
@@ -101,27 +76,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
           <option value="2">收入</option>
         </select>
       </div>
+
       <div class="col-md-3">
         <label class="form-label">分類</label>
         <select name="category_id" class="form-select" required>
           <option value="">-- 請選擇分類 --</option>
-          <?php
-          $res = $conn->query("SELECT category_id, name FROM categories ORDER BY name");
-          while ($row = $res->fetch_assoc()) {
-              echo "<option value='" . htmlspecialchars($row['category_id']) . "'>" . htmlspecialchars($row['name']) . "</option>";
-          }
-          ?>
         </select>
       </div>
+
       <div class="col-md-3">
         <label class="form-label">日期</label>
         <input type="date" name="date" class="form-control" required value="<?= date('Y-m-d') ?>">
       </div>
+
       <div class="col-md-2">
         <label class="form-label">備註</label>
         <input type="text" name="note" class="form-control">
       </div>
     </div>
+
     <div class="mt-4 text-end">
       <button type="submit" class="btn btn-success">儲存記錄</button>
       <a href="categories.php" class="btn btn-outline-primary">分類管理</a>
@@ -129,5 +102,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_transaction'])) {
     </div>
   </form>
 </div>
+
+<script>
+async function loadCategories() {
+  const res = await fetch("/api/categories_list.php");
+  if (!res.ok) return;
+
+  const data = await res.json();
+  const select = document.querySelector('[name="category_id"]');
+
+  data.forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c.category_id;
+    opt.textContent = c.name;
+    select.appendChild(opt);
+  });
+}
+
+document.getElementById("addForm").addEventListener("submit", async function (e) {
+  e.preventDefault();
+
+  const errorBox = document.getElementById("errorBox");
+  errorBox.classList.add("d-none");
+
+  const data = {
+    amount: document.querySelector('[name="amount"]').value,
+    type: document.querySelector('[name="type"]').value,
+    category_id: document.querySelector('[name="category_id"]').value,
+    date: document.querySelector('[name="date"]').value,
+    note: document.querySelector('[name="note"]').value
+  };
+
+  const res = await fetch("/api/transaction_add.php", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  if (res.ok) {
+    window.location.href = "index.php?success=1";
+  } else {
+    errorBox.textContent = result.error || "新增失敗";
+    errorBox.classList.remove("d-none");
+  }
+});
+
+loadCategories();
+</script>
+
 </body>
 </html>

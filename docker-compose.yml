@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  web:
+    build: .
+    container_name: accounting-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - db
+    networks:
+      - accounting-net
+
+  db:
+    image: mysql:8.0
+    container_name: accounting-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: accounting
+      MYSQL_USER: accuser
+      MYSQL_PASSWORD: accpass
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - accounting-net
+
+networks:
+  accounting-net:
+    driver: bridge
+
+volumes:
+  dbdata:
